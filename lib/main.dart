@@ -2,17 +2,21 @@ import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:taskerpro/task_proider.dart';
+import 'package:taskerpro/dialogs.dart';
 import 'addTaskPage.dart';
 import 'task.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-void main() {
-  // runApp(const MyApp());
+void main() async {
+  // For Flutter firebase
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(
     ChangeNotifierProvider(
       create: (_) => TaskProvider(),
       child: const MyApp(),
     ),
-    // const MyApp(),
   );
 }
 
@@ -42,44 +46,56 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   List<Task> myTasks = [];
+  bool _isLoading = true;
 
   void _loadDummyData() {
     context.read<TaskProvider>().addTask(Task(
-        title: 'Flutter Assignment',
-        description: 'task management system',
-        dueDate: DateTime(2022, 02, 27)));
+        title: 'Flutter Assignment 4',
+        description: 'task management system + flutter',
+        dueDate: DateTime(2022, 03, 28)));
     context.read<TaskProvider>().addTask(Task(
         title: 'Buisness Inteligence',
-        description: 'Bi Dashboarding',
-        dueDate: DateTime(2022, 02, 25)));
+        description: 'Bi Pitch to company',
+        dueDate: DateTime(2022, 04, 15)));
     context.read<TaskProvider>().addTask(Task(
-        title: 'MobAppDev: Project Proposal',
-        description:
-            'You need to submit a PDF document which contains the following details about your project',
-        dueDate: DateTime(2022, 03, 8)));
+        title: 'MobAppDev: Project Phase 3',
+        description: 'Working UI in code.',
+        dueDate: DateTime(2022, 03, 28)));
     context.read<TaskProvider>().addTask(Task(
-        title: 'SP Lab 12',
-        description: 'Systems Programing Lab task 12',
-        dueDate: DateTime(2022, 02, 24)));
+        title: 'Corporate Work',
+        description: 'Trax Weighing Scales',
+        dueDate: DateTime(2022, 03, 30)));
     context.read<TaskProvider>().addTask(Task(
         title: 'Quiz DAA',
-        description: 'Quiz on recurrences',
-        dueDate: DateTime(2022, 02, 28)));
+        description: 'Quiz on Dynamic Programming',
+        dueDate: DateTime(2022, 03, 5)));
   }
 
   @override
-  void initState() {
+  initState() {
     // ignore: todo
     // TODO: implement initState
     super.initState();
     // Dummy Data
     // _loadDummyData();
+
+    //Run circular progress bar
+    loadInitial();
+  }
+
+  void loadInitial() async {
+    // Load from Firebase
+    context.read<TaskProvider>().loadTasks();
+    // delay(Duration(seconds: 2));
+    await Future.delayed(const Duration(seconds: 2));
+    _isLoading = false;
+    // wait for the data to load
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     myTasks = context.watch<TaskProvider>().tasks;
-
     return Scaffold(
         appBar: AppBar(
           title: Text(widget.title),
@@ -87,61 +103,63 @@ class _MyHomePageState extends State<MyHomePage> {
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              if (myTasks.isEmpty)
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    const Padding(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                      child: Text(
-                        "You have no pending tasks",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 30,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 30.0,
-                        horizontal: 0,
-                      ),
-                      child: ElevatedButton(
-                        onPressed: () {
-                          // Navigate to add task page
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => addTask(),
-                              ));
-                        },
-                        onLongPress: () {
-                          //Load Dummy Data
-                          _loadDummyData();
-                        },
-                        child: const Text(
-                          'Add a New Task',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
+            children: _isLoading
+                ? <Widget>[const CircularProgressIndicator()]
+                : <Widget>[
+                    if (myTasks.isEmpty)
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          const Padding(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 10),
+                            child: Text(
+                              "You have no pending tasks",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 30,
+                                color: Colors.grey,
+                              ),
+                            ),
                           ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 30.0,
+                              horizontal: 0,
+                            ),
+                            child: ElevatedButton(
+                              onPressed: () {
+                                // Navigate to add task page
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => addTask(),
+                                    ));
+                              },
+                              onLongPress: () {
+                                //Load Dummy Data
+                                _loadDummyData();
+                              },
+                              child: const Text(
+                                'Add a New Task',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          )
+                        ],
+                      )
+                    else
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: myTasks.length,
+                          itemBuilder: (context, index) {
+                            return TaskTile(task: myTasks[index]);
+                          },
                         ),
                       ),
-                    )
                   ],
-                )
-              else
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: myTasks.length,
-                    itemBuilder: (context, index) {
-                      return TaskTile(task: myTasks[index]);
-                    },
-                  ),
-                ),
-            ],
           ),
         ),
         floatingActionButton: _getFAB());
@@ -203,6 +221,7 @@ class TaskTile extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
+              // Mark as done button
               IconButton(
                 icon: task.isDone
                     ? const Icon(Icons.check_circle_rounded,
@@ -213,6 +232,15 @@ class TaskTile extends StatelessWidget {
                       ? context.read<TaskProvider>().markTaskNotDone(task)
                       : context.read<TaskProvider>().markTaskDone(task);
                   //tell the parent class to  setState(){};
+                },
+              ),
+              // Delete Button
+              IconButton(
+                icon: const Icon(Icons.delete),
+                onPressed: () async {
+                  await dialogs.showDeleteConfirmationDialog(context, task)
+                      ? context.read<TaskProvider>().removeTask(task)
+                      : null;
                 },
               ),
               // Rectangle box
@@ -234,10 +262,6 @@ class TaskTile extends StatelessWidget {
               context,
               MaterialPageRoute(builder: (context) => showTask(myTask: task)),
             );
-          },
-          onLongPress: () {
-            //Remove that Task
-            context.read<TaskProvider>().removeTask(task);
           },
         ),
       ),

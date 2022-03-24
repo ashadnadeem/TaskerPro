@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.taskerpro">
+    package="com.ashcorp.taskerpro">
    <application
         android:label="taskerpro"
         android:name="${applicationName}"
