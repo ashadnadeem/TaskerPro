@@ -36,6 +36,21 @@
   <!-- This script installs service_worker.js to provide PWA functionality to
        application. For more information, see:
        https://developers.google.com/web/fundamentals/primers/service-workers -->
+       <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+       <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+       <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyBXOnFtC1mBJoxigZTNZUHff62y6HyXZFY",
+          authDomain: "taskerpro-31e7a.firebaseapp.com",
+          projectId: "taskerpro-31e7a",
+          storageBucket: "taskerpro-31e7a.appspot.com",
+          messagingSenderId: "846401053786",
+          appId: "1:846401053786:web:4d0958f83bbc9f656ae463"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+      </script>
   <script>
     var serviceWorkerVersion = null;
     var scriptLoaded = false;

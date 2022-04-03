@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:taskerpro/dialogs.dart';
 import 'package:taskerpro/task_proider.dart';
 import 'package:provider/provider.dart';
 import 'task.dart';
 
 class addTask extends StatefulWidget {
-  addTask({Key? key}) : super(key: key);
+  Task? ptask;
+  addTask({Key? key, Task? this.ptask}) : super(key: key);
 
   @override
   State<addTask> createState() => _addTaskState();
@@ -16,6 +18,19 @@ class _addTaskState extends State<addTask> {
   final _titleController = TextEditingController();
   DateTime? _selectedDate;
   Object? $;
+  bool _isEdit = false;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    if (widget.ptask != null) {
+      _titleController.text = widget.ptask!.title;
+      _descriptionController.text = widget.ptask!.description;
+      _selectedDate = widget.ptask!.dueDate;
+      _isEdit = true;
+    }
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -116,22 +131,30 @@ class _addTaskState extends State<addTask> {
                   horizontal: 80.0,
                 ),
                 child: ElevatedButton(
-                  child: const Text('Add Task'),
+                  child: Text(_isEdit ? 'Edit Task' : 'Add Task'),
                   onPressed: () {
                     // Check No fields are empty
                     if (_selectedDate == null ||
                         _titleController.text == '' ||
                         _descriptionController.text == '') {
-                      _showErrorDialog();
+                      dialogs.showEmptyFieldsErrorDialog(context);
                     } else {
-                      final Task task = Task(
+                      Task task = Task(
                         title: _titleController.text,
                         description: _descriptionController.text,
+                        isDone: false,
                         dueDate:
                             _selectedDate!, //force unwrapping because non null condition already handled
                       );
-                      print(DateFormat("dd MMMM yyyy").format(_selectedDate!));
-                      context.read<TaskProvider>().addTask(task);
+                      // print(DateFormat("dd MMMM yyyy").format(_selectedDate!));
+                      // Check if task is being edited or added
+                      if (_isEdit) {
+                        task.id = widget.ptask!.id;
+                        context.read<TaskProvider>().updateTaskInFirebase(task);
+                        Navigator.pop(context);
+                      } else {
+                        context.read<TaskProvider>().addTask(task);
+                      }
                       Navigator.pop(context);
                     }
                   },
@@ -156,28 +179,6 @@ class _addTaskState extends State<addTask> {
       return;
     }
     setState(() => _selectedDate = newDate);
-  }
-
-  Future _showErrorDialog() async {
-    return showDialog<bool>(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Can't leave the fields blank"),
-          content:
-              const Text('Please fill in all the fields before adding a task'),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
   }
 
   boxBorder({required BorderRadius borderRadius}) {}

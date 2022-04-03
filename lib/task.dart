@@ -2,8 +2,12 @@ import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:taskerpro/task_proider.dart';
+import 'package:taskerpro/dialogs.dart';
+
+import 'addTaskPage.dart';
 
 class Task {
+  late final String id;
   final String title;
   final String description;
   final DateTime dueDate;
@@ -14,7 +18,31 @@ class Task {
     required this.title,
     required this.description,
     required this.dueDate,
+    this.isDone = false,
+    this.markedDoneDate,
   });
+
+  // toJson
+  Map<String, dynamic> toJson() {
+    return {
+      'title': title,
+      'description': description,
+      'dueDate': dueDate.toIso8601String(),
+      'isDone': isDone,
+      'markedDoneDate': markedDoneDate?.toIso8601String(),
+    };
+  }
+
+  // fromJson
+  static Task fromJson(Map<String, dynamic> json) => Task(
+        title: json['title'],
+        description: json['description'],
+        dueDate: DateTime.parse(json['dueDate']),
+        isDone: json['isDone'],
+        markedDoneDate: json['markedDoneDate'] == null
+            ? null
+            : DateTime.parse(json['markedDoneDate']),
+      );
 }
 
 class showTask extends StatefulWidget {
@@ -43,6 +71,7 @@ class _showTaskState extends State<showTask> {
       body: Center(
         // Main Column
         child: Column(
+          // mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
             // Column Left Aligned for Texts
@@ -107,36 +136,77 @@ class _showTaskState extends State<showTask> {
                     ),
                   ]),
             ),
-            _myTask.isDone
-                ? Container()
-                : Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: <Widget>[
-                      Container(
-                        width: double.infinity,
-                        child: Padding(
-                          padding: const EdgeInsets.all(80.0),
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                                alignment: Alignment.center,
-                                primary: Colors.green,
-                                onPrimary: Colors.white,
-                                textStyle: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                )),
-                            onPressed: () {
-                              //Mark this Task as Done
-                              context
-                                  .read<TaskProvider>()
-                                  .markTaskDone(_myTask);
-                              Navigator.pop(context);
-                            },
-                            child: const Text("Mark as Done"),
+            Row(
+              // mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Delete task button
+                TextButton(
+                  style: ElevatedButton.styleFrom(
+                      primary: Colors.redAccent, onPrimary: Colors.white),
+                  onPressed: () async {
+                    if (await dialogs.showDeleteConfirmationDialog(
+                        context, _myTask)) {
+                      context.read<TaskProvider>().removeTask(_myTask);
+                      Navigator.pop(context);
+                    } else
+                      null;
+                  },
+                  child: Row(children: const <Widget>[
+                    Text('Delete',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, color: Colors.white)),
+                    Icon(Icons.delete)
+                  ]),
+                ),
+                // Edit task button
+                TextButton(
+                  style: ElevatedButton.styleFrom(
+                      primary: Colors.blue, onPrimary: Colors.amber),
+                  onPressed: () async {
+                    // Navigate to addTaskPage
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => addTask(ptask: _myTask),
+                        ));
+                  },
+                  child: Row(children: const <Widget>[
+                    Text('Edit',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, color: Colors.amber)),
+                    Icon(Icons.edit)
+                  ]),
+                ),
+                _myTask.isDone
+                    ? Container()
+                    : Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: <Widget>[
+                          Padding(
+                            padding: const EdgeInsets.all(00.0),
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  alignment: Alignment.center,
+                                  primary: Colors.green,
+                                  onPrimary: Colors.white,
+                                  textStyle: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  )),
+                              onPressed: () {
+                                //Mark this Task as Done
+                                context
+                                    .read<TaskProvider>()
+                                    .markTaskDone(_myTask);
+                                Navigator.pop(context);
+                              },
+                              child: const Text("Mark as Done"),
+                            ),
                           ),
-                        ),
+                        ],
                       ),
-                    ],
-                  ),
+              ],
+            ),
           ],
         ),
       ),

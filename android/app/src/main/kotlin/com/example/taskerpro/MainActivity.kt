@@ -1,4 +1,4 @@
-package com.example.taskerpro
+package com.ashcorp.taskerpro
 
 import io.flutter.embedding.android.FlutterActivity
 
