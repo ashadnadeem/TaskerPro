@@ -1,16 +1,17 @@
-# taskerpro
+# Tasker Pro
 
-A new Flutter project.
+A simple, easy to use, Task management system, which accurately and effectively:
+- Manages your Tasks: Add | Delete | Edit
+- let you add your deadlines
+- sort your tasks according to nearest deadline
+- cross of your pending task when they're done
+- when you mark a particular task as done, automaticaly it goes in the end of your task list
 
 ## Getting Started
+- git clone https://github.com/ashadnadeem/TaskerPro.git
+- cd taskerpro
+- flutter run
 
-This project is a starting point for a Flutter application.
+A Quick Demo of the App
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+![gif_demo_taskerpro](https://user-images.githubusercontent.com/58692788/163362537-a80c6c79-86aa-4989-b179-2254e9f0307e.gif)
