@@ -11,7 +11,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 void main() async {
   // For Flutter firebase
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: const FirebaseOptions(
+      apiKey: "AIzaSyBXOnFtC1mBJoxigZTNZUHff62y6HyXZFY",
+      authDomain: "taskerpro-31e7a.firebaseapp.com",
+      projectId: "taskerpro-31e7a",
+      storageBucket: "taskerpro-31e7a.appspot.com",
+      messagingSenderId: "846401053786",
+      appId: "1:846401053786:web:4d0958f83bbc9f656ae463",
+    ),
+  );
   runApp(
     ChangeNotifierProvider(
       create: (_) => TaskProvider(),
